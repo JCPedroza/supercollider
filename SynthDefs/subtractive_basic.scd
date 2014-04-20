@@ -1,3 +1,5 @@
+
+// Sawtooth
 SynthDef.new("saw", {
 
     arg freq    = 500,  phase = 0, mul = 0.2, add = 0,
@@ -19,22 +21,3 @@ SynthDef.new("saw", {
     Out.ar(0, sig);
 
 }).send(s);
-
-r = Routine({
-    var delta, freq;
-    loop {
-
-        delta = rrand(0.1, 0.2);
-        freq  = notes.choose;
-
-        Synth.new("saw",
-                [mul: rrand(0.2, 0.5), freq: freq, attack: 0, decay: 2,
-                sustain: 1, ffreq: exprand(freq * 2.0, freq * 5.0),
-                fattack: 0.01, fdecay: rrand(0.2, 1), fsustain: 0.001, frelease: 0,
-                amt: exprand(500.00, 7000),rq: 1, pan: rrand(-1.0, 1.0)]);
-
-        delta.yield;
-    }
-});
-
-r.play;

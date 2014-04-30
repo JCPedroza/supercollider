@@ -1,4 +1,4 @@
-
+// NEEDS TO HANDLE FFREQ!!! (currently fenv * amt * ffreq crashes audio)
 // Sawtooth
 SynthDef.new("saw", {
 

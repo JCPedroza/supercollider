@@ -1,8 +1,12 @@
-// The memory needs to be expanded to support a lot of CombN:
+// The memory needs to be expanded to support a lot of CombN: ADSR maybe?
+// Variable name clean
+// Seems that lfo in freq in saw osc is inducing clicks, check that
 (
 s.options.memSize = 64000;
 s.boot;
 )
+
+// Implement new envelopes, current ones don't seem to be working as expected
 
 (
 SynthDef.new("saw", {
@@ -13,17 +17,22 @@ SynthDef.new("saw", {
         fattack = 0.05, fdecay = 0.05, fsustain = 0.99, frelease = 0.1, fsustainLevel = 0.5,
         d1time = 0.2, d1decaytime = 4, d1mul = 1, d1add = 0,
         d2time = 0.2, d2decaytime = 4, d2mul = 1, d2add = 0,
+        lfo1freq = 10, lfo2freq = 10, lfo1amt = 3, lfo2amt = 3,
         pan = 0, pulsewidth;
 
-    var aenv, fenv, sig, saw, pulse;
+    var aenv, fenv, sig, saw, pulse, lfo1, lfo2;
 
     // Envelopes
     aenv   = EnvGen.kr(Env([0, 1, sustainLevel, 0], [attack, decay, sustain, release]), doneAction: 2);
     fenv   = EnvGen.kr(Env([0, 1, fsustainLevel, 0], [fattack, fdecay, fsustain, frelease]));
 
+    // LFOs
+    lfo1 = SinOsc.kr(lfo1freq);
+    lfo2 = SinOsc.kr(lfo2freq);
+
     // Oscilators
-    saw   = Saw.ar(freq, mul, add);
-    pulse = Pulse.ar(freq2, pulsewidth, mul2, add);
+    saw   = Saw.ar(freq + (lfo1 * lfo1amt), mul, add);
+    pulse = Pulse.ar(freq2 + (lfo2 * lfo2amt), pulsewidth, mul2, add);
 
     // Signal Path
     sig = Mix.ar([saw, pulse]);                                   // Mix oscilators
@@ -47,19 +56,21 @@ r = Routine({
 
     loop {
 
-        delta = exprand(0.005, 0.08);
-        freq  = [a, c, e].choose *
-                [0.25, 0.5, 1, 2, 3].choose;
+        delta = exprand(0.005, 0.1);
+        freq  = [c, eb, g, b].choose *
+                [1, 2, 3].choose;
 
         Synth.new("saw",
             [mul: rrand(0.01, 0.3), mul2: rrand(0.01, 0.3), pan: rrand(-1.0, 1.0),
             freq: freq * rrand(0.98, 1.02), freq2: freq * rrand(0.98, 1.02),
             pulsewidth: rrand(0.0, 1.0), attack: 0.001, sustain: 1,
-            ffreq: exprand(10.0, 200.0), amt: exprand(300.0, 4000.0), rq: rrand(0.5, 1),
-            fattack: exprand(0.001, 0.2), fdecay: exprand(0.001, 1.0), fsustain: rrand(0.0, 0.5),
-            fsustainLevel: rrand(0.01, 0.9),
-            d1time: rrand(0.005, 0.5), d1decaytime: rrand(-1.8, 1.8),
-            d2time: rrand(0.005, 0.5), d2decaytime: rrand(-1.8, 1.8)]);
+            ffreq: exprand(10.0, 200.0), amt: exprand(300.0, 4000.0), rq: 1,
+            fattack: 0.001, fdecay: exprand(0.05, 0.1), fsustain: 0.1,
+            fsustainLevel: 0.1,
+            lfo1freq: exprand(0.1, 20), lfo2freq: exprand(0.1, 20),
+            lfo1amt: exprand(0.5, 20), lfo2amt: exprand(0.5, 20),
+            d1time: rrand(0.005, 0.5), d1decaytime: rrand(-1.0, 1.0),
+            d2time: rrand(0.005, 0.5), d2decaytime: rrand(-1.0, 1.0)]);
 
         delta.yield;
     }

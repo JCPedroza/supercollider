@@ -4,7 +4,7 @@
 // Implement a linear and fast modulation to the LFOs
 // Phasemod osc introduced some clicks, how to fix them?
 (
-s.options.memSize = 64000;
+s.options.memSize = 128000;
 s.boot;
 )
 
@@ -19,7 +19,7 @@ SynthDef.new(\Cloud1, {
         pmCarFreq = 100, pmModFreq = 100, pmIndex = 1,           // Phasemod oscilator
         pmModPhase = 0, pmMul = 0.2, pmAdd = 0,
         ffreq = 20000, amt = 4000, rq = 1, fmul = 1, fadd = 0,   // Filter
-        attack = 0.05, decay  = 0.05, sustain  = 0.99,           // Amp Envelope
+        attack = 0.001, decay  = 0.05, sustain  = 1,             // Amp Envelope
         release  = 0.1, sustainLevel = 0.5,
         fattack = 0.05, fdecay = 0.05, fsustain = 0.99,          // Filter envelope
         frelease = 0.1, fsustainLevel = 0.5,
@@ -69,27 +69,34 @@ r = Routine({
     loop {
 
         delta = exprand(0.005, 0.1);
-        freq  = [c, e, g, b, gb].choose *
+        freq  = [c, eb, g].choose *
                 [0.5, 1, 2, 3, 4].choose;
 
         Synth.new(\Cloud1,
             [
-            // Sawtooth
-            sawMul: rrand(0.01, 0.25), pulseMul: rrand(0.01, 0.25), pan: rrand(-1.0, 1.0),
-            sawFreq: freq * rrand(0.99, 1.01), pulseFreq: freq * rrand(0.99, 1.01),
+            // Saw
+            sawFreq: freq * rrand(0.99, 1.01), sawMul: rrand(0.01, 0.2), lfo1freq: exprand(0.1, 20),
+            lfo1amt: exprand(0.5, 50),
+
+            // Pulse
+            pulseFreq: freq * rrand(0.99, 1.01), pulseMul: rrand(0.01, 0.2),
+            pulseWidth: rrand(0.001, 0.999), lfo2freq: exprand(0.1, 20), lfo2amt: exprand(0.5, 50),
 
             // PhaseMod
-            pmCarFreq: freq, pmModFreq: [0.5, 1, 2].choose * freq, pmIndex: exprand(0.5, 4),
-            pmMul: rrand(0.01, 0.3), lfo3freq: exprand(0.1, 20), lfo3amt: exprand(0.5, 50),
+            pmCarFreq: freq, pmModFreq: [0.5, 1, 2].choose * freq, pmMul: rrand(0.01, 0.2),
+            pmIndex: exprand(0.5, 4), lfo3freq: exprand(0.1, 20), lfo3amt: exprand(0.5, 50),
 
-            pulseWidth: rrand(0.0, 1.0), attack: 0.001, sustain: 1,
-            ffreq: exprand(10.0, 200.0), amt: exprand(300.0, 4000.0), rq: rrand(0.8, 1),
+            // Filter & Filter Envelope
+            ffreq: exprand(10.0, 200.0), rq: rrand(0.8, 1), amt: exprand(300.0, 4000.0),
             fattack: exprand(0.001, 0.08), fdecay: exprand(0.05, 0.1), fsustain: 0.1,
             fsustainLevel: 0.1,
-            lfo1freq: exprand(0.1, 20), lfo2freq: exprand(0.1, 20),
-            lfo1amt: exprand(0.5, 50), lfo2amt: exprand(0.5, 50),
+
+            // Comb Delays
             d1time: rrand(0.005, 0.5), d1decaytime: rrand(-1.0, 1.0),
-            d2time: rrand(0.005, 0.5), d2decaytime: rrand(-1.0, 1.0)
+            d2time: rrand(0.005, 0.5), d2decaytime: rrand(-1.0, 1.0),
+
+            // Mix
+            pan: rrand(-1.0, 1.0)
             ]);
 
         delta.yield;

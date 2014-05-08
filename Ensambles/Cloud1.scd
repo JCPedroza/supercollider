@@ -68,8 +68,8 @@ r = Routine({
 
     loop {
 
-        delta = exprand(0.005, 0.1);
-        freq  = [c, eb, g].choose *
+        delta = exprand(0.005, 0.05);
+        freq  = [a, db, e].choose *
                 [0.5, 1, 2, 3, 4].choose;
 
         Synth.new(\Cloud1,

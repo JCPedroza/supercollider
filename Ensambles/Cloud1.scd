@@ -13,30 +13,30 @@ s.boot;
 (
 SynthDef.new(\Cloud1, {
 
-    arg sawFreq = 500,  sawMul = 0.2,  sawAdd = 0,               // Saw oscilator
-        pulseFreq = 500, pulseWidth = 0.5, pulseMul = 0.2,       // Pulse oscilator
+    arg sawFreq = 500,  sawMul = 0.2,  sawAdd = 0,                                   // Saw oscilator
+        pulseFreq = 500, pulseWidth = 0.5, pulseMul = 0.2,                           // Pulse oscilator
         pulseAdd = 0,
-        ffreq = 20000, amt = 4000, rq = 1, fmul = 1, fadd = 0,   // Filter
-        attack = 0.001, decay  = 0.05, sustain  = 2,             // Amp Envelope
+        ffreq = 20000, amt = 4000, rq = 1, fmul = 1, fadd = 0,                       // Filter
+        attack = 0.001, decay  = 0.05, sustain  = 2,                                 // Amp Envelope
         release  = 1, sustainLevel = 0.9,
-        fattack = 0.05, fdecay = 0.05, fsustain = 0.99,          // Filter envelope
+        fattack = 0.05, fdecay = 0.05, fsustain = 0.99,                              // Filter envelope
         frelease = 0.1, fsustainLevel = 0.5,
-        lfo1freq = 10, lfo2freq = 10, lfo1amt = 3, lfo2amt = 3,  // LFOs
-        pan = 0;                                                 // Mix
+        pitchLFO1freq = 10, pitchLFO2freq = 10, pitchLFO1amt = 3, pitchLFO2amt = 3,  // Pitch LFOs
+        pan = 0;                                                                     // Mix
 
-    var aEnv, fEnv, sig, saw, pulse, lfo1, lfo2;
+    var aEnv, fEnv, sig, saw, pulse, pitchLFO1, pitchLFO2;
 
     // Envelopes
     aEnv   = EnvGen.kr(Env([0, 1, sustainLevel, 0], [attack, decay, sustain, release]), doneAction: 2);
     fEnv   = EnvGen.kr(Env([0, 1, fsustainLevel, 0], [fattack, fdecay, fsustain, frelease]));
 
     // LFOs
-    lfo1 = SinOsc.kr(lfo1freq);
-    lfo2 = SinOsc.kr(lfo2freq);
+    pitchLFO1 = SinOsc.kr(pitchLFO1freq);
+    pitchLFO2 = SinOsc.kr(pitchLFO2freq);
 
     // Oscilators
-    saw      = Saw.ar(sawFreq + (lfo1 * lfo1amt), sawMul, sawAdd);                      // Saw
-    pulse    = Pulse.ar(pulseFreq + (lfo2 * lfo2amt), pulseWidth, pulseMul, pulseAdd);  // Pulse
+    saw      = Saw.ar(sawFreq + (pitchLFO1 * pitchLFO1amt), sawMul, sawAdd);                      // Saw
+    pulse    = Pulse.ar(pulseFreq + (pitchLFO2 * pitchLFO2amt), pulseWidth, pulseMul, pulseAdd);  // Pulse
 
     // Signal Path
     sig = Mix.ar([saw, pulse]);                                   // Mix oscilators
@@ -59,8 +59,8 @@ r = Routine({
     loop {
 
         delta = exprand(0.005, 0.05);
-        freq  = [a, c, e].choose *
-                [1, 2, 3].choose;
+        // delta = 0.0125;
+        freq  = [a, c, e].choose * [1, 2].choose;
 
         Synth.new(\Cloud1, [
 
@@ -72,8 +72,8 @@ r = Routine({
             pulseWidth: rrand(0.001, 0.999),
 
             // LFOs
-            lfo1freq: exprand(0.05, 3), lfo1amt: exprand(0.5, 20),
-            lfo2freq: exprand(0.05, 3), lfo2amt: exprand(0.5, 20),
+            pitchLFO1freq: exprand(0.05, 3), pitchLFO1amt: exprand(0.5, 20),
+            pitchLFO2freq: exprand(0.05, 3), pitchLFO2amt: exprand(0.5, 20),
 
             // Filter & Filter Envelope
             ffreq: 10.0, rq: 1, amt: exprand(300.0, 5000.0),

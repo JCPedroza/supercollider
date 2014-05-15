@@ -21,8 +21,6 @@ SynthDef.new(\Cloud1, {
         release  = 1, sustainLevel = 0.9,
         fattack = 0.05, fdecay = 0.05, fsustain = 0.99,          // Filter envelope
         frelease = 0.1, fsustainLevel = 0.5,
-        d1time = 0.2, d1decaytime = 4, d1mul = 1, d1add = 0,     // Comb delay 1
-        d2time = 0.2, d2decaytime = 4, d2mul = 1, d2add = 0,     // Comb delay 2
         lfo1freq = 10, lfo2freq = 10, lfo1amt = 3, lfo2amt = 3,  // LFOs
         pan = 0;                                                 // Mix
 
@@ -44,8 +42,6 @@ SynthDef.new(\Cloud1, {
     sig = Mix.ar([saw, pulse]);                                   // Mix oscilators
     sig = RLPF.ar(sig, fEnv * amt + ffreq, rq, fmul, fadd);       // Low pass filter
     sig = sig * aEnv;                                             // Amp envelope
-    /*sig = CombN.ar(sig, 2, d1time, d1decaytime, d1mul, d1add);    // Comb delay 1
-    sig = CombN.ar(sig, 2, d2time, d2decaytime, d2mul, d2add);    // Comb delay 2*/
     sig = Pan2.ar(sig, pan);                                      // Panning
 
     Out.ar(0, sig);
@@ -86,10 +82,6 @@ r = Routine({
 
             // Amp Envelope
             attack: exprand(0.001, 0.1),
-
-            // Comb Delays
-            d1time: rrand(0.005, 0.5), d1decaytime: rrand(0, 1.0),
-            d2time: rrand(0.005, 0.5), d2decaytime: rrand(0, 1.0),
 
             // Mix
             pan: rrand(-1.0, 1.0)

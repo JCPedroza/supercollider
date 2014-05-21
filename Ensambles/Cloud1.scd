@@ -12,9 +12,10 @@ SynthDef.new(\Cloud1, {
         fattack = 0.05, fdecay = 0.05, fsustain = 0.99,                              // Filter envelope
         frelease = 0.1, fsustainLevel = 0.5,
         pitchLFO1freq = 10, pitchLFO2freq = 10, pitchLFO1amt = 3, pitchLFO2amt = 3,  // Pitch LFOs
+        filterLFOfreq = 1, filterLFOamt = 1,                                         // Filter LFO
         pan = 0;                                                                     // Mix
 
-    var aEnv, fEnv, sig, saw, pulse, pitchLFO1, pitchLFO2;
+    var aEnv, fEnv, pitchLFO1, pitchLFO2, filterLFO, saw, pulse, sig;
 
     // Envelopes
     aEnv   = EnvGen.kr(Env([0, 1, sustainLevel, 0], [attack, decay, sustain, release]), doneAction: 2);
@@ -23,16 +24,18 @@ SynthDef.new(\Cloud1, {
     // LFOs
     pitchLFO1 = SinOsc.kr(pitchLFO1freq);
     pitchLFO2 = SinOsc.kr(pitchLFO2freq);
+    filterLFO = SinOsc.ar(filterLFOfreq).range(0, 1);
 
     // Oscilators
-    saw      = Saw.ar(sawFreq + (pitchLFO1 * pitchLFO1amt), sawMul, sawAdd);                      // Saw
-    pulse    = Pulse.ar(pulseFreq + (pitchLFO2 * pitchLFO2amt), pulseWidth, pulseMul, pulseAdd);  // Pulse
+    saw   = Saw.ar(sawFreq + (pitchLFO1 * pitchLFO1amt), sawMul, sawAdd);                      // Saw
+    pulse = Pulse.ar(pulseFreq + (pitchLFO2 * pitchLFO2amt), pulseWidth, pulseMul, pulseAdd);  // Pulse
 
     // Signal Path
-    sig = Mix.ar([saw, pulse]);                                   // Mix oscilators
-    sig = RLPF.ar(sig, fEnv * amt + ffreq, rq, fmul, fadd);       // Low pass filter
-    sig = sig * aEnv;                                             // Amp envelope
-    sig = Pan2.ar(sig, pan);                                      // Panning
+    sig = Mix.ar([saw, pulse]);                                             // Mix oscilators
+    sig = RLPF.ar(sig, (fEnv * amt + ffreq) + (filterLFO * filterLFOamt),   // Low pass filter
+            rq, fmul, fadd);
+    sig = sig * aEnv;                                                       // Amp envelope
+    sig = Pan2.ar(sig, pan);                                                // Panning
 
     Out.ar(0, sig);
 
@@ -49,7 +52,7 @@ r = Routine({
     loop {
 
         delta = exprand(0.0025, 0.1);
-        freq  = [d, f, a, c].choose * [1, 2, 3].choose;
+        freq  = [d, f, a, c].choose * [0.5, 1, 2, 3].choose;
 
         Synth.new(\Cloud1, [
 
@@ -63,9 +66,10 @@ r = Routine({
             // LFOs
             pitchLFO1freq: rrand(0.05, 20), pitchLFO1amt: rrand(0.5, 6),
             pitchLFO2freq: rrand(0.05, 20), pitchLFO2amt: rrand(0.5, 6),
+            filterLFOfreq: 10, filterLFOamt: 5000,
 
             // Filter & Filter Envelope
-            ffreq: 10.0, rq: [1, 1, 1, 1, 1, 1, rrand(0.1, 1)].choose,
+            ffreq: 10.0, rq: [1, 1, 1, 1, 1, 1, rrand(0.6, 1)].choose,
             amt: freq + exprand(100.0, 7000.0),
             fattack: 0.001, fdecay: exprand(0.05, 1), fsustain: rrand(0.1, 0.7),
             fsustainLevel: rrand(0.1, 0.9), frelease: rrand(0.1, 0.7),

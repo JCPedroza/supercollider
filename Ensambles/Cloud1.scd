@@ -1,14 +1,4 @@
-// The memory needs to be expanded to support a lot of CombN: ADSR maybe?
-// Variable name clean
-// Seems that lfo in freq in saw osc is inducing clicks, check that
 // Implement a linear and fast modulation to the LFOs
-// Phasemod osc introduced some clicks, how to fix them?
-(
-s.options.memSize = 256000;
-s.boot;
-)
-
-// Implement new envelopes, current ones don't seem to be working as expected (not sure about this one)
 
 (
 SynthDef.new(\Cloud1, {
@@ -58,30 +48,31 @@ r = Routine({
 
     loop {
 
-        delta = exprand(0.005, 0.05);
-        // delta = 0.0125;
-        freq  = [a, c, e].choose * [1, 2].choose;
+        delta = exprand(0.0025, 0.1);
+        freq  = [d, f, a, c].choose * [1, 2, 3].choose;
 
         Synth.new(\Cloud1, [
 
             // Saw
-            sawFreq: freq * rrand(0.99, 1.01), sawMul: rrand(0.001, 0.05),
+            sawFreq: freq * rrand(0.99, 1.01), sawMul: rrand(0.004, 0.05),
 
             // Pulse
-            pulseFreq: freq * rrand(0.99, 1.01), pulseMul: rrand(0.001, 0.05),
+            pulseFreq: freq * rrand(0.99, 1.01), pulseMul: rrand(0.004, 0.05),
             pulseWidth: rrand(0.001, 0.999),
 
             // LFOs
-            pitchLFO1freq: exprand(0.05, 3), pitchLFO1amt: exprand(0.5, 20),
-            pitchLFO2freq: exprand(0.05, 3), pitchLFO2amt: exprand(0.5, 20),
+            pitchLFO1freq: rrand(0.05, 20), pitchLFO1amt: rrand(0.5, 6),
+            pitchLFO2freq: rrand(0.05, 20), pitchLFO2amt: rrand(0.5, 6),
 
             // Filter & Filter Envelope
-            ffreq: 10.0, rq: 1, amt: exprand(300.0, 5000.0),
-            fattack: 0.001, fdecay: exprand(0.05, 0.3), fsustain: rrand(0.1, 0.7),
-            fsustainLevel: rrand(0.1, 0.9), frelease: rrand(0.1, 0.5),
+            ffreq: 10.0, rq: [1, 1, 1, 1, 1, 1, rrand(0.1, 1)].choose,
+            amt: freq + exprand(100.0, 7000.0),
+            fattack: 0.001, fdecay: exprand(0.05, 1), fsustain: rrand(0.1, 0.7),
+            fsustainLevel: rrand(0.1, 0.9), frelease: rrand(0.1, 0.7),
 
             // Amp Envelope
-            attack: exprand(0.001, 0.1),
+            attack: exprand(0.001, 1), decay: exprand(0.05, 1),
+            sustainLevel: rrand(0.1, 0.9),
 
             // Mix
             pan: rrand(-1.0, 1.0)
@@ -93,4 +84,10 @@ r = Routine({
 });
 
 r.play;
+)
+
+// GUI
+(
+w = Window.new("Cloud1", Rect(200,200,255,100));
+w.front;
 )

@@ -1,3 +1,44 @@
+(
+SynthDef.new(\Trumpet, {
+
+    arg freq = 100, mul = 0.2, add = 0,
+        attack = 0.001, decay = 0.001, sustain = 0.9, release = 0.001, sustainLevel = 0.9,  // Amp Env
+        pan = 0.5;
+
+    var osc, sig, aEnv;
+
+    // Envelopes
+    aEnv = EnvGen.kr(Env([0, 1, sustainLevel, 0], [attack, decay, sustain, release]), doneAction: 2);
+
+    // Oscilator
+    osc = Saw.ar(freq, mul, add);
+
+    // Mix
+    sig = Pan2.ar(osc, pan);
+    sig = sig * aEnv;
+
+    Out.ar(0, sig);
+
+}).add;
+)
+
+Synth.new(\Trumpet, [freq: 100, mul: 0.2, pan: 0.5, attack: 0.5]);
+a.play
+
+
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// NOTES:
+
 /*
 "http://www.soundonsound.com/sos/apr01/articles/synthsecrets.asp"
 

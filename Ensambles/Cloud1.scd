@@ -1,4 +1,3 @@
-// Implement a linear and fast modulation to the LFOs
 
 (
 SynthDef.new(\Cloud1, {
@@ -34,12 +33,12 @@ SynthDef.new(\Cloud1, {
     pulse = Pulse.ar(pulseFreq + (pitchLFO2 * pitchLFO2amt), pulseWidth, pulseMul, pulseAdd);  // Pulse
 
     // Signal Path
-    sig = Mix.ar([saw, pulse]);                                              // Mix oscilators
-    sig = RLPF.ar(sig, (fEnv * amt + ffreq) +                                // Low pass filter
-            ((filterLFO * filterLFOamt) + (filterLFOLFO * filterLFOLFOamt)), // Filter LFOs
+    sig = Mix.ar([saw, pulse]);                                               // Mix oscilators
+    sig = RLPF.ar(sig, (fEnv * amt + ffreq) +                                 // Low pass filter
+            ((filterLFO * filterLFOamt) + (filterLFOLFO * filterLFOLFOamt)),  // Filter LFOs
             rq, fmul, fadd);
-    sig = sig * aEnv;                                                        // Amp envelope
-    sig = Pan2.ar(sig, Line.kr(panInit, panEnd, panDuration));               // Panning
+    sig = sig * aEnv;                                                         // Amp envelope
+    sig = Pan2.ar(sig, Line.kr(panInit, panEnd, panDuration));                // Panning
 
     Out.ar(0, sig);
 
@@ -75,10 +74,12 @@ r = Routine({
             filterLFOfreq: [rrand(0.01, 3), exprand(0.1, 20)].choose,
             filterLFOamt: [0, exprand(1, 5000)].choose,
 
-            filterLFOLFOfreq: exprand(0.01, 2), filterLFOLFOamt: exprand(100, 1000),
+            filterLFOLFOfreq: [rrand(0.01, 3), exprand(0.1, 20)].choose,
+            filterLFOLFOamt: [0, 0, rrand(100, 2000)].choose,
 
             // Filter & Filter Envelope
-            ffreq: 10.0, rq: [1, 1, 1, 1, 1, 1, rrand(0.4, 1)].choose,
+            ffreq: freq, rq: [1, 1, 1, 1, 1, 1, rrand(0.4, 1)].choose,
+
             amt: freq + exprand(100.0, 7000.0),
             fattack: 0.001, fdecay: exprand(0.05, 1), fsustain: rrand(0.1, 0.7),
             fsustainLevel: rrand(0.1, 0.9), frelease: rrand(0.1, 0.7),

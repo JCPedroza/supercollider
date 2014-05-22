@@ -24,7 +24,7 @@ SynthDef.new(\Cloud1, {
     // LFOs
     pitchLFO1 = SinOsc.kr(pitchLFO1freq);
     pitchLFO2 = SinOsc.kr(pitchLFO2freq);
-    filterLFO = SinOsc.ar(filterLFOfreq).range(0, 1);
+    filterLFO = SinOsc.kr(filterLFOfreq).range(0, 1);
 
     // Oscilators
     saw   = Saw.ar(sawFreq + (pitchLFO1 * pitchLFO1amt), sawMul, sawAdd);                      // Saw
@@ -52,7 +52,7 @@ r = Routine({
     loop {
 
         delta = exprand(0.0025, 0.1);
-        freq     = [g, bb, d].choose * [0.5, 1, 2, 3].choose;
+        freq     = [c, e, g, b].choose * [1, 2, 3].choose;
         panValue = rrand(-1.0, 1.0);
 
         Synth.new(\Cloud1, [
@@ -81,9 +81,9 @@ r = Routine({
             sustainLevel: rrand(0.1, 0.9),
 
             // Pan
-            panInit: [panValue, panValue, rrand(-1.0, 1.0), -1, 1].choose,
-                     [panValue, panValue, rrand(-1.0, 1.0), -1, 1].choose,
-            panDuration: rrand(0.005, 0.5)
+            panInit: [panValue, rrand(-1.0, 1.0)].choose,
+            panEnd: [panValue, rrand(-1.0, 1.0)].choose,
+            panDuration: rrand(0.005, 0.25)
 
             ]);
 

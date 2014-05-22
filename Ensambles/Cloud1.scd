@@ -13,7 +13,7 @@ SynthDef.new(\Cloud1, {
         frelease = 0.1, fsustainLevel = 0.5,
         pitchLFO1freq = 10, pitchLFO2freq = 10, pitchLFO1amt = 3, pitchLFO2amt = 3,  // Pitch LFOs
         filterLFOfreq = 1, filterLFOamt = 1,                                         // Filter LFO
-        pan = 0;                                                                     // Mix
+        panInit = 0, panEnd = 0, panDuration = 1;
 
     var aEnv, fEnv, pitchLFO1, pitchLFO2, filterLFO, saw, pulse, sig;
 
@@ -35,7 +35,7 @@ SynthDef.new(\Cloud1, {
     sig = RLPF.ar(sig, (fEnv * amt + ffreq) + (filterLFO * filterLFOamt),   // Low pass filter
             rq, fmul, fadd);
     sig = sig * aEnv;                                                       // Amp envelope
-    sig = Pan2.ar(sig, pan);                                                // Panning
+    sig = Pan2.ar(sig, Line.kr(panInit, panEnd, panDuration));              // Panning
 
     Out.ar(0, sig);
 
@@ -45,14 +45,15 @@ SynthDef.new(\Cloud1, {
 (
 r = Routine({
 
-    var delta, freq, c = 261.626, db = 277.183, d = 293.665, eb = 311.127, e = 329.628,
+    var delta, freq, panValue, c = 261.626, db = 277.183, d = 293.665, eb = 311.127, e = 329.628,
         f = 349.228, gb = 369.994, g = 391.995, ab = 415.305, a = 440.000, bb = 466.164,
         b = 493.883;
 
     loop {
 
         delta = exprand(0.0025, 0.1);
-        freq  = [d, f, a, c].choose * [0.5, 1, 2, 3].choose;
+        freq     = [g, bb, d].choose * [0.5, 1, 2, 3].choose;
+        panValue = rrand(-1.0, 1.0);
 
         Synth.new(\Cloud1, [
 
@@ -66,7 +67,8 @@ r = Routine({
             // LFOs
             pitchLFO1freq: rrand(0.05, 20), pitchLFO1amt: rrand(0.5, 6),
             pitchLFO2freq: rrand(0.05, 20), pitchLFO2amt: rrand(0.5, 6),
-            filterLFOfreq: 10, filterLFOamt: 5000,
+            filterLFOfreq: [rrand(0.01, 3), exprand(0.1, 20)].choose,
+            filterLFOamt: [0, exprand(1, 5000)].choose,
 
             // Filter & Filter Envelope
             ffreq: 10.0, rq: [1, 1, 1, 1, 1, 1, rrand(0.6, 1)].choose,
@@ -78,8 +80,10 @@ r = Routine({
             attack: exprand(0.001, 1), decay: exprand(0.05, 1),
             sustainLevel: rrand(0.1, 0.9),
 
-            // Mix
-            pan: rrand(-1.0, 1.0)
+            // Pan
+            panInit: [panValue, panValue, rrand(-1.0, 1.0), -1, 1].choose,
+                     [panValue, panValue, rrand(-1.0, 1.0), -1, 1].choose,
+            panDuration: rrand(0.005, 0.5)
 
             ]);
 

@@ -1,20 +1,21 @@
-// scale attack times correctly, currently the attack time is too long at low amps
+
 (
 SynthDef.new(\Brass, {
 
-    arg freq = 100, mul = 0.2, add = 0,
-        sustain = 1, sustainLevel = 1,  // Amp Env
+    arg freq = 100, mul = 0.2,
+        sustain = 2,
         pan = 0.5;
 
-    var osc, sig, aEnv, attack, release;
+    var osc, sig, aEnv, attack, release, sustainLevel;
 
     // Envelopes
-    attack  = (0.01 / mul);
-    release = 0.1;
+    attack  = (0.020 / mul);       // Attack stage gets shorter as the velocity increases.
+    release = 0.2;                 // Average of analyzed brass instruments
+    sustainLevel = 1;
     aEnv = EnvGen.kr(Env([0, sustainLevel, 0], [attack, sustain, release]), doneAction: 2);
 
     // Oscilator
-    osc = Saw.ar(freq, mul, add);
+    osc = Saw.ar(freq, mul);
 
     // Mix
     sig = osc * aEnv;
@@ -25,7 +26,7 @@ SynthDef.new(\Brass, {
 }).add;
 )
 
-Synth.new(\Brass, [freq: 100, mul: 0.05]);
+Synth.new(\Brass, [freq: 100, mul: 0.3]);
 
 // --------------------------------------------------------------------------------
 // NOTES:

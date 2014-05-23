@@ -1,46 +1,37 @@
+// scale attack times correctly, currently the attack time is too long at low amps
 (
-SynthDef.new(\Trumpet, {
+SynthDef.new(\Brass, {
 
     arg freq = 100, mul = 0.2, add = 0,
-        attack = 0.001, decay = 0.001, sustain = 0.9, release = 0.001, sustainLevel = 0.9,  // Amp Env
+        sustain = 1, sustainLevel = 1,  // Amp Env
         pan = 0.5;
 
-    var osc, sig, aEnv;
+    var osc, sig, aEnv, attack, release;
 
     // Envelopes
-    aEnv = EnvGen.kr(Env([0, 1, sustainLevel, 0], [attack, decay, sustain, release]), doneAction: 2);
+    attack  = (0.01 / mul);
+    release = 0.1;
+    aEnv = EnvGen.kr(Env([0, sustainLevel, 0], [attack, sustain, release]), doneAction: 2);
 
     // Oscilator
     osc = Saw.ar(freq, mul, add);
 
     // Mix
-    sig = Pan2.ar(osc, pan);
-    sig = sig * aEnv;
+    sig = osc * aEnv;
+    sig = Pan2.ar(sig, pan);
 
     Out.ar(0, sig);
 
 }).add;
 )
 
-Synth.new(\Trumpet, [freq: 100, mul: 0.2, pan: 0.5, attack: 0.5]);
-a.play
-
-
-
-
-
-
-
-
-
-
-
+Synth.new(\Brass, [freq: 100, mul: 0.05]);
 
 // --------------------------------------------------------------------------------
 // NOTES:
 
 /*
-"http://www.soundonsound.com/sos/apr01/articles/synthsecrets.asp"
+http://www.soundonsound.com/sos/apr01/articles/synthsecrets.asp
 
 1- we now know that a trumpet produces a complete harmonic series with significant
 amplitudes of higher harmonics present. Only one common waveform fits the bill;
@@ -57,4 +48,11 @@ of EQ) that emphasises higher harmonics as the loudness of the note increases.
 4- we know that a high note has fewer harmonics than a low note, so we must set up
 our filter tracking such that, as the pitch rises, the cutoff frequency rises more
 slowly, thus tapering the harmonic series.
+
+http://www.soundonsound.com/sos/may01/articles/synthsecrets.asp
+
+Amplitude Response:
+- Faster attack with higher amplitudes. Attack stage gets shorter as the velocity increases.
+- Possible tremolo during sustain phase.
+- Short release.
 */

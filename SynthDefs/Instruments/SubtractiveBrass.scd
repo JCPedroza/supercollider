@@ -2,31 +2,36 @@
 (
 SynthDef.new(\Brass, {
 
-    arg freq = 100, mul = 0.2,
-        sustain = 2,
+    arg freq = 100, mul = 0.2,                   // Oscilator
+        sustain = 3,                             // Amp Envelope
+        tremoloFreq = 0,                         // LFO: tremolo
         pan = 0.5;
 
-    var osc, sig, aEnv, attack, release, sustainLevel;
+    var osc, sig, aEnv, attack, release, sustainLevel, tremolo;
 
-    // Envelopes
+    // Amplitude Envelope
     attack  = (0.020 / mul);       // Attack stage gets shorter as the velocity increases.
     release = 0.2;                 // Average of analyzed brass instruments
     sustainLevel = 1;
     aEnv = EnvGen.kr(Env([0, sustainLevel, 0], [attack, sustain, release]), doneAction: 2);
 
+    // LFO: tremolo
+    tremolo = SinOsc.kr(tremoloFreq).range(0.90, 1);
+
     // Oscilator
     osc = Saw.ar(freq, mul);
 
-    // Mix
-    sig = osc * aEnv;
-    sig = Pan2.ar(sig, pan);
+    // Signal Path
+    sig = osc * aEnv;                    // Amp Envelope
+    sig = sig * tremolo;                 // LFO: tremolo
+    sig = Pan2.ar(sig, pan);             // Panning
 
     Out.ar(0, sig);
 
 }).add;
 )
 
-Synth.new(\Brass, [freq: 100, mul: 0.3]);
+Synth.new(\Brass, [freq: 100, mul: 0.3, tremoloFreq: 5]);
 
 // --------------------------------------------------------------------------------
 // NOTES:

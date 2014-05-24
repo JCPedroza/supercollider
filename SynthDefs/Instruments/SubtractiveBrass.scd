@@ -1,10 +1,10 @@
-// !!! two separate RLPF, one for resonance, one for envelope
+
 (
 SynthDef.new(\Brass, {
 
     arg freq = 100, mul = 0.2,                   // Oscilator
         sustain = 3,                             // Amp Envelope
-        tremoloFreq = 0,                         // LFO: tremolo
+        tremoloFreq = 5,                         // LFO: tremolo
         pan = 0.5;
 
     var osc, sig, aEnv, fEnv, attack, release, sustainLevel, tremolo, filterPeak, filterRq;
@@ -24,7 +24,7 @@ SynthDef.new(\Brass, {
     osc = Saw.ar(freq, mul);
 
     // Filtering
-    filterPeak = freq + (mul * 3000);           // Louder notes have more harmonics than quieter ones. !!!???
+    filterPeak = (3000 - 1000) * mul + 1000;    // Louder notes have more harmonics than quieter ones.
     filterRq   = (1 - 0.3) * (1 - mul) + 0.3;   // Amp of lower harmonics decrease as the note gets louder.
 
     // Signal Path
@@ -39,7 +39,7 @@ SynthDef.new(\Brass, {
 }).add;
 )
 
-Synth.new(\Brass, [freq: 100, mul: 0.7, tremoloFreq: 5]);
+Synth.new(\Brass, [freq: 100, mul: 0.6]);
 
 /* --------------------------------------------------------------------------------
 NOTES:

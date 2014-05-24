@@ -20,8 +20,8 @@ SynthDef.new(\Brass, {
     var osc, sig, aEnv, fEnv, attack, release, tremolo, filterPeak, filterRq,
         growl, growlEnv, vibrato, vibratoEnv, noise, filterMax, filterMin;
 
-    // mul to log scale
-    mul = (mul.log - 0.1.log) / (1.log - 0.1.log);
+    mul = (1 - 0.3) * mul + 0.3;                   // re-scaling to 0.3 being the lowest value
+    mul = (mul.log - 0.1.log) / (1.log - 0.1.log); // mul lin to log conversion
 
     // Amplitude Envelope
     attack  = (0.07 - 0.02) * (1 - mul) + 0.02;  // Attack stage gets shorter as the velocity increases.
@@ -69,7 +69,7 @@ SynthDef.new(\Brass, {
 }).add;
 )
 
-Synth.new(\Brass, [freq: 100, mul: 0.1]);
+Synth.new(\Brass, [freq: 100, mul: 0.8]);
 
 /* --------------------------------------------------------------------------------
 NOTES:

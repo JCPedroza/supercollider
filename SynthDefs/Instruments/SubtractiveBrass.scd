@@ -1,8 +1,13 @@
 // !!! growl lfo needs to be triangle waveform
 // !!! is the growl noticeable? tweak if not
 // !!! Are the vibrato envelope times ok? Can they be improved?
-// !!! Are the filter's curoff freqs ok?
+// !!! Are the filter's cutoff freqs ok?
 // !!! Can the noise be implemented better?
+// !!! AD to tremolo
+// !!! Scale amp to make it audible from pianissimo to fortissimo
+// !!! Amp needs to be handled logarithmically, it gets loud until the highest values.
+// !!! Scale the filter peak to the frequency, so it works in octaves or something like that
+
 (
 SynthDef.new(\Brass, {
 
@@ -10,10 +15,13 @@ SynthDef.new(\Brass, {
         sustain = 3,                             // Amp Envelope
         tremoloFreq = 5,                         // LFO: tremolo
         vibratoFreq = 4.5, vibratoAmt = 0.4,     // LFO: vibrato
-        pan = 0.5;
+        pan = 0;
 
     var osc, sig, aEnv, fEnv, attack, release, tremolo, filterPeak, filterRq,
-        growl, growlEnv, vibrato, vibratoEnv, noise;
+        growl, growlEnv, vibrato, vibratoEnv, noise, filterMax, filterMin;
+
+    // mul to log scale
+    mul = (mul.log - 0.1.log) / (1.log - 0.1.log);
 
     // Amplitude Envelope
     attack  = (0.07 - 0.02) * (1 - mul) + 0.02;  // Attack stage gets shorter as the velocity increases.
@@ -27,7 +35,7 @@ SynthDef.new(\Brass, {
     tremolo = SinOsc.kr(tremoloFreq).range(0.90, 1);
 
     // Filter LFO: growl
-    growl    = SinOsc.ar(80).range(0,1);  // !!! needs to be triangle
+    growl    = SinOsc.ar(80).range(0,1);
     growlEnv = EnvGen.kr(Env([0, 1, 0], [0.001, attack * 2, 0.1]));
     growl    = growl * growlEnv;
 
@@ -38,11 +46,15 @@ SynthDef.new(\Brass, {
 
     // Oscilators
     osc   = Saw.ar(freq + (vibrato * vibratoAmt), mul);
-    noise = WhiteNoise.ar(mul/20);
+    noise = WhiteNoise.ar(mul/26);
 
     // Filtering
-    filterPeak = (3000 - 1000) * mul + 1000;    // Louder notes have more harmonics than quieter ones.
-    filterRq   = (1 - 0.3) * (1 - mul) + 0.3;   // Amp of lower harmonics decrease as the note gets louder.
+    // Louder notes have more harmonics than quieter ones. (filterPeak calculation)
+    // Relative amp of lower harmonics decrease as the note gets louder. (filterRq calculation)
+    filterMax  = 2000;
+    filterMin  = 200;
+    filterPeak = (filterMax - filterMin) * mul + filterMin;
+    filterRq   = (1 - 0.1) * (1 - mul) + 0.1;
 
     // Signal Path
     sig = Mix.ar([osc, noise]);
@@ -57,13 +69,13 @@ SynthDef.new(\Brass, {
 }).add;
 )
 
-Synth.new(\Brass, [freq: 100, mul: 0.8]);
+Synth.new(\Brass, [freq: 100, mul: 0.1]);
 
 /* --------------------------------------------------------------------------------
 NOTES:
 
 - Resonance and envelope LPFs are implemented separately to avoid the resonance sweeping
-  through the envelope. Resonance should affect constant frequencies.
+  through the envelope.
 
 */
 
@@ -129,5 +141,24 @@ Vibrato:
   an AR ramp controlling the amount of modulation.
 - I find that modulating frequencies in the region of 5Hz sound the most realistic, and that the
   amplitude of the modulation must be very low, otherwise the timbre will sound electronic.
+
+Conclusion:
+
+The truth is still more complex than presented here. For example, we've ignored any conventional
+pitch envelope that the player might wish to create (including portamento effects) and the effects
+of formants on the timbre of the tonal elements of the sound. I have also ignored the phases of the
+harmonics which, due to the complexities of brass instruments, are not all in phase with one another.
+Furthermore, the amplitude of individual harmonics may change during the course of the note, and in
+ways that we cannot easily emulate using low-pass filters and amplifiers. Even the frequencies of the
+harmonics (which, at this point, we should strictly call 'partials') are not constant, and can vary
+between the transient and the steady state. Indeed, for reasons we need not dwell on here, the partials
+are not, strictly speaking, harmonics at all. Their frequencies are stretched out (sharpened) as the
+harmonic number increases.
+
+When you look at it like this, you have to conclude that subtractive synthesis is not an ideal way to
+recreate brass sounds. In theory, microtonal additive synthesis would be a far better way to go about
+it. Indeed, additive synths such as the Kawai K5 and K5000 are superb at recreating brass-type sounds.
+Nevertheless, if you're careful about it, subtractive synthesis can make more than a passable stab
+(pun intended) at producing the sounds of brass instruments.
 
 */

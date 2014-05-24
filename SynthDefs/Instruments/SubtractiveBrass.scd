@@ -1,6 +1,8 @@
 // !!! growl lfo needs to be triangle waveform
 // !!! is the growl noticeable? tweak if not
 // !!! Are the vibrato envelope times ok? Can they be improved?
+// !!! Are the filter's curoff freqs ok?
+// !!! Can the noise be implemented better?
 (
 SynthDef.new(\Brass, {
 
@@ -11,7 +13,7 @@ SynthDef.new(\Brass, {
         pan = 0.5;
 
     var osc, sig, aEnv, fEnv, attack, release, tremolo, filterPeak, filterRq,
-        growl, growlEnv, vibrato, vibratoEnv;
+        growl, growlEnv, vibrato, vibratoEnv, noise;
 
     // Amplitude Envelope
     attack  = (0.07 - 0.02) * (1 - mul) + 0.02;  // Attack stage gets shorter as the velocity increases.
@@ -34,26 +36,28 @@ SynthDef.new(\Brass, {
     vibratoEnv = EnvGen.kr(Env([0, 1, 0], [sustain / 2.0, sustain / 2.0, 0.1]));
     vibrato    = vibrato * vibratoEnv;
 
-    // Oscilator
-    osc = Saw.ar(freq + (vibrato * vibratoAmt), mul);
+    // Oscilators
+    osc   = Saw.ar(freq + (vibrato * vibratoAmt), mul);
+    noise = WhiteNoise.ar(mul/20);
 
     // Filtering
     filterPeak = (3000 - 1000) * mul + 1000;    // Louder notes have more harmonics than quieter ones.
-    filterRq   = (1 - 0.5) * (1 - mul) + 0.5;   // Amp of lower harmonics decrease as the note gets louder.
+    filterRq   = (1 - 0.3) * (1 - mul) + 0.3;   // Amp of lower harmonics decrease as the note gets louder.
 
     // Signal Path
-    sig = RLPF.ar(osc, freq + filterPeak, filterRq);  // Resonance LPF
+    sig = Mix.ar([osc, noise]);
+    sig = RLPF.ar(sig, freq + filterPeak, filterRq);                   // Resonance LPF
     sig = RLPF.ar(sig, freq + (fEnv * filterPeak) + (growl * 5000));   // Envelope LPF
-    sig = sig * aEnv;                                 // Amp Envelope
-    sig = sig * tremolo;                              // LFO: tremolo
-    sig = Pan2.ar(sig, pan);                          // Panning
+    sig = sig * aEnv;                                                  // Amp Envelope
+    sig = sig * tremolo;                                               // LFO: tremolo
+    sig = Pan2.ar(sig, pan);                                           // Panning
 
     Out.ar(0, sig);
 
 }).add;
 )
 
-Synth.new(\Brass, [freq: 130, mul: 0.8]);
+Synth.new(\Brass, [freq: 100, mul: 0.8]);
 
 /* --------------------------------------------------------------------------------
 NOTES:

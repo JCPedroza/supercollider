@@ -4,9 +4,6 @@
 // !!! Are the filter's cutoff freqs ok?
 // !!! Can the noise be implemented better?
 // !!! AD to tremolo
-// !!! Scale amp to make it audible from pianissimo to fortissimo
-// !!! Amp needs to be handled logarithmically, it gets loud until the highest values.
-// !!! Scale the filter peak to the frequency, so it works in octaves or something like that
 
 (
 SynthDef.new(\Brass, {

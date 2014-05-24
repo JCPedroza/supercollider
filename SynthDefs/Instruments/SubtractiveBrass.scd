@@ -1,15 +1,17 @@
 // !!! growl lfo needs to be triangle waveform
 // !!! is the growl noticeable? tweak if not
+// !!! Are the vibrato envelope times ok? Can they be improved?
 (
 SynthDef.new(\Brass, {
 
     arg freq = 100, mul = 0.2,                   // Oscilator
         sustain = 3,                             // Amp Envelope
         tremoloFreq = 5,                         // LFO: tremolo
+        vibratoFreq = 4.5, vibratoAmt = 0.4,     // LFO: vibrato
         pan = 0.5;
 
     var osc, sig, aEnv, fEnv, attack, release, tremolo, filterPeak, filterRq,
-        growl, growlEnv;
+        growl, growlEnv, vibrato, vibratoEnv;
 
     // Amplitude Envelope
     attack  = (0.07 - 0.02) * (1 - mul) + 0.02;  // Attack stage gets shorter as the velocity increases.
@@ -27,8 +29,13 @@ SynthDef.new(\Brass, {
     growlEnv = EnvGen.kr(Env([0, 1, 0], [0.001, attack * 2, 0.1]));
     growl    = growl * growlEnv;
 
+    // Freq LFO: vibrato
+    vibrato    = SinOsc.kr(vibratoFreq);
+    vibratoEnv = EnvGen.kr(Env([0, 1, 0], [sustain / 2.0, sustain / 2.0, 0.1]));
+    vibrato    = vibrato * vibratoEnv;
+
     // Oscilator
-    osc = Saw.ar(freq, mul);
+    osc = Saw.ar(freq + (vibrato * vibratoAmt), mul);
 
     // Filtering
     filterPeak = (3000 - 1000) * mul + 1000;    // Louder notes have more harmonics than quieter ones.
@@ -46,7 +53,7 @@ SynthDef.new(\Brass, {
 }).add;
 )
 
-Synth.new(\Brass, [freq: 200, mul: 0.8]);
+Synth.new(\Brass, [freq: 130, mul: 0.8]);
 
 /* --------------------------------------------------------------------------------
 NOTES:
@@ -98,18 +105,25 @@ Tonal Response:
   ADSR envelope in the LPF cutoff frequency.
 
 Growl:
--  All brass instruments require a 'settling time' at the start of the note. This is
-   because it takes a finite amount of time for the standing wave to reach its steady state.
-   This means that there's a period of pitch instability lasting about 50mS: a duration of
-   the same order as the time it takes for all the harmonics to reach their steady-state amplitudes.
-   Now, you might expect to apply some sort of modulation to the oscillator to emulate this, but
-   there's a good reason not to do so: sidebands
-   Solution:
-   Instead, I apply a modulator to the low-pass filter in a way that achieves the desired effect.
-   A triangle wave is an acceptable source for this modulation, and a frequency in the
-   region of 80Hz does the trick nicely. Of course, you don't want the resulting growl to last
-   for the duration of the note; it should last as long as the instability in the acoustic
-   instrument we're synthesizing. Therefore, we patch the modulation into the filter through a
-   VCA whose gain is controlled by an AD contour generator
+- All brass instruments require a 'settling time' at the start of the note. This is
+  because it takes a finite amount of time for the standing wave to reach its steady state.
+  This means that there's a period of pitch instability lasting about 50mS: a duration of
+  the same order as the time it takes for all the harmonics to reach their steady-state amplitudes.
+  Now, you might expect to apply some sort of modulation to the oscillator to emulate this, but
+  there's a good reason not to do so: sidebands
+  Solution:
+  Instead, I apply a modulator to the low-pass filter in a way that achieves the desired effect.
+  A triangle wave is an acceptable source for this modulation, and a frequency in the
+  region of 80Hz does the trick nicely. Of course, you don't want the resulting growl to last
+  for the duration of the note; it should last as long as the instability in the acoustic
+  instrument we're synthesizing. Therefore, we patch the modulation into the filter through a
+  VCA whose gain is controlled by an AD contour generator
+
+Vibrato:
+- Since vibrato does not occur during the transient stage of the note, you can't simply apply
+  an LFO to the oscillator. Delayed vibrato is what is required, and it's usually implemented as
+  an AR ramp controlling the amount of modulation.
+- I find that modulating frequencies in the region of 5Hz sound the most realistic, and that the
+  amplitude of the modulation must be very low, otherwise the timbre will sound electronic.
 
 */

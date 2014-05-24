@@ -24,7 +24,7 @@ SynthDef.new(\Brass, {
 
     // Filter LFO: growl
     growl    = SinOsc.ar(80).range(0,1);  // !!! needs to be triangle
-    growlEnv = EnvGen.kr(Env([0, 1, 0], [0.001, attack, 0.1]));
+    growlEnv = EnvGen.kr(Env([0, 1, 0], [0.001, attack * 2, 0.1]));
     growl    = growl * growlEnv;
 
     // Oscilator

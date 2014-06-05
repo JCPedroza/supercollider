@@ -8,13 +8,13 @@ SynthDef.new(\Kick, {
 
     var saw, sqr, sig, aEnv, fEnv;
 
-    // Oscillators
-    saw = Saw.ar(freq, mul);
-    sqr = Pulse.ar(freq, 0.5, mul);
-
     // Amp & Filter envelopes
     aEnv = EnvGen.kr(Env([0, 1, 0], [attack, decay * 2]), doneAction: 2);
     fEnv = EnvGen.kr(Env([0.01, 1, 0.01], [attack, decay], 'exp'));
+
+    // Oscillators
+    saw = Saw.ar(freq, mul);
+    sqr = Pulse.ar(freq, 0.5, mul);
 
     // Signal path
     sig = Mix.ar([saw, sqr]);
@@ -38,7 +38,7 @@ p = Pbind(
     \decay, Pseq([0.2], inf),
     \mul, Pseq([0.1], inf),
     \rq, Pseq([0.001], inf),
-    \fEnvAmt, Pseq([300], inf),
+    \fEnvAmt, Pseq([250], inf),
     \dur, Pseq([0.5, 0.6, 0.4, 0.5], inf)
 ).play;
 )

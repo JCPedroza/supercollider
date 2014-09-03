@@ -55,7 +55,7 @@ r = Routine({
     loop {
 
         delta = exprand(0.0025, 0.15);
-        freq     = [f, ab, c, eb].choose * [0.25, 0.5, 1, 2, 1, 2, 3].choose;
+        freq     = [a, db, e].choose * [1, 2, 3].choose;
         panValue = rrand(-1.0, 1.0);
 
         Synth.new(\Cloud1, [
@@ -80,12 +80,12 @@ r = Routine({
             // Filter & Filter Envelope
             ffreq: freq, rq: [1, 1, 1, 1, 1, 1, rrand(0.4, 1)].choose,
 
-            amt: freq + exprand(100.0, 7000.0),
-            fattack: 0.001, fdecay: exprand(0.05, 1), fsustain: rrand(0.1, 0.7),
-            fsustainLevel: rrand(0.1, 0.9), frelease: rrand(0.1, 0.7),
+            amt: freq + exprand(100.0, 200.0),
+            fattack: 0.001, fdecay: exprand(0.025, 0.1), fsustain: rrand(0.025, 0.1),
+            fsustainLevel: rrand(0.25, 0.9), frelease: rrand(0.025, 0.1),
 
             // Amp Envelope
-            attack: exprand(0.001, 1), decay: exprand(0.05, 1),
+            attack: exprand(0.008, 0.1), decay: exprand(0.05, 0.1),
             sustainLevel: rrand(0.1, 0.9),
 
             // Pan

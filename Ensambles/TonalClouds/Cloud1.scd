@@ -47,22 +47,29 @@ SynthDef.new(\Cloud1, {
 }).add;
 )
 
-(
-var on, off;
-
-MIDIClient.init;
-MIDIIn.connectAll;
-
-on = MIDIFunc.noteOn({|val, num, chan, src|
-    num.postln;})
-)
-
+// !!! TODO: handle empty freqArra list (when no key is being pressed). Maybe using if statement?
 (
 r = Routine({
 
     var delta, freq, panValue, c = 261.626, db = 277.183, d = 293.665, eb = 311.127, e = 329.628,
         f = 349.228, gb = 369.994, g = 391.995, ab = 415.305, a = 440.000, bb = 466.164,
-        b = 493.883, freqArray = List.newUsing([a, c, e, g]);
+    b = 493.883, freqArray = List.newUsing([100]), on, off;
+
+    MIDIClient.init;
+    MIDIIn.connectAll;
+
+    // This needs to be optimized! Looking for the index of the value in off is too much.
+    on = MIDIFunc.noteOn({
+        |val, num, chan, src|
+        freqArray.add(num);
+        freqArray.postln;
+    });
+
+    off = MIDIFunc.noteOff({
+        |val, num, chan, src|
+        freqArray.removeAt(freqArray.indexOf(num));
+        freqArray.postln;
+    });
 
     loop {
 
@@ -108,6 +115,7 @@ r = Routine({
             ]);
 
         delta.yield;
+
     }
 });
 

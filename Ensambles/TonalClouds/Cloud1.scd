@@ -1,4 +1,6 @@
 
+s.boot;
+
 (
 SynthDef.new(\Cloud1, {
 
@@ -46,16 +48,20 @@ SynthDef.new(\Cloud1, {
 )
 
 (
+MIDIClient.init;
+)
+
+(
 r = Routine({
 
     var delta, freq, panValue, c = 261.626, db = 277.183, d = 293.665, eb = 311.127, e = 329.628,
         f = 349.228, gb = 369.994, g = 391.995, ab = 415.305, a = 440.000, bb = 466.164,
-        b = 493.883;
+        b = 493.883, freqArray = List.newUsing([a, c, e, g]);
 
     loop {
 
         delta = exprand(0.0025, 0.15);
-        freq     = [a, db, e].choose * [1, 2, 3].choose;
+        freq  = freqArray.choose * [1, 2].choose;
         panValue = rrand(-1.0, 1.0);
 
         Synth.new(\Cloud1, [

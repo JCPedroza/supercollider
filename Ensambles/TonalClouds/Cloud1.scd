@@ -48,7 +48,13 @@ SynthDef.new(\Cloud1, {
 )
 
 (
+var on, off;
+
 MIDIClient.init;
+MIDIIn.connectAll;
+
+on = MIDIFunc.noteOn({|val, num, chan, src|
+    num.postln;})
 )
 
 (
